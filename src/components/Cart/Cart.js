@@ -1,12 +1,13 @@
-import { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 
-import React from 'react';
 import classes from './Cart.module.css';
 import Modal from '../UI/Modal';
 import CartItem from './CartItem';
 import CartContext from '../../store/cart-context';
+import CheckoutForm from './CheckoutForm';
 
 const Cart = (props) => {
+  const [checkout, setCheckout] = useState(false);
   const cartCtx = useContext(CartContext);
 
   const totalAmount = `$${cartCtx.totalAmount.toFixed(2)}`;
@@ -18,6 +19,19 @@ const Cart = (props) => {
 
   const cartItemAddHandler = (item) => {
     cartCtx.addItem({ ...item, amount: 1 });
+  };
+
+  const checkoutHandler = () => {
+    setCheckout(true);
+  };
+
+  const submitOrderHandler = (userData) => {
+    fetch('https://react-http-ad80e-default-rtdb.firebaseio.com/order.json', {
+      method: 'POST',
+      body: JSON.stringify({ user: userData, orderedItem: cartCtx.items }),
+    });
+    console.log(userData);
+    console.log(cartCtx.items);
   };
 
   const carItems = (
@@ -35,6 +49,20 @@ const Cart = (props) => {
     </ul>
   );
 
+  const modalActions = (
+    <div className={classes.actions}>
+      <button className={classes['button--alt']} onClick={props.onClose}>
+        Close
+      </button>
+
+      {hasItems && !checkout && (
+        <button onClick={checkoutHandler} className={classes.button}>
+          Order
+        </button>
+      )}
+    </div>
+  );
+
   return (
     <Modal onClose={props.onClose}>
       {carItems}
@@ -42,14 +70,10 @@ const Cart = (props) => {
         <span>Total Amount</span>
         <span>{totalAmount}</span>
       </div>
-      <div>
-        <div className={classes.actions}>
-          <button className={classes['button--alt']} onClick={props.onClose}>
-            Close
-          </button>
-          {hasItems && <button className={classes.button}>Order</button>}
-        </div>
-      </div>
+      {checkout && (
+        <CheckoutForm onConfirm={submitOrderHandler} onCancel={props.onClose} />
+      )}
+      {!checkout && modalActions}
     </Modal>
   );
 };
