@@ -3,7 +3,7 @@ import { useState } from 'react';
 import classes from './CheckoutForm.module.css';
 
 const isEmpty = (input) => input.trim() === '';
-const isNotPostal = (postal) => postal.trim().length !== 5;
+const isNotPostal = (postal) => postal.trim().length !== 8;
 
 const CheckoutForm = (props) => {
   const [formInputsValidity, setFormInputsValidity] = useState({
